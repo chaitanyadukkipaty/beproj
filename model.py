@@ -6,6 +6,20 @@ import tensorlayer as tl
 from tensorlayer.layers import (Input, Conv2d, BatchNorm2d, Elementwise, SubpixelConv2d, Flatten, Dense)
 from tensorlayer.models import Model
 
+def get_espcn(input_shape):
+    w_init = tf.random_normal_initializer(stddev=0.02)
+    g_init = tf.random_normal_initializer(1., 0.02)
+
+    nin = Input(input_shape)
+    n = Conv2d(64, (5, 5), (1, 1), act=tf.nn.relu, padding='SAME', W_init=w_init)(nin)
+    n = Conv2d(32, (3, 3), (1, 1), act=tf.nn.relu, padding='SAME', W_init=w_init)(n)
+    n = SubpixelConv2d(scale=2, n_out_channels=None, act=tf.nn.relu)(n)
+    n = Conv2d(48, (3, 3), (1, 1), act=None, padding='SAME', W_init=w_init)(n)
+    n = SubpixelConv2d(scale=2, n_out_channels=None, act=tf.nn.relu)(n)
+    nn = Conv2d(3, (1, 1), (1, 1), act=tf.nn.tanh, padding='SAME', W_init=w_init)(n)
+    G = Model(inputs=nin, outputs=nn, name="generator_espcn")
+    return G
+
 def get_G(input_shape):
     w_init = tf.random_normal_initializer(stddev=0.02)
     g_init = tf.random_normal_initializer(1., 0.02)
